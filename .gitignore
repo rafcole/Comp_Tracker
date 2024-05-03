@@ -2,6 +2,6 @@
 .env
 .env.*
 ./venv
-/env
+env/
 ./downloaded_files
-/__pycach__
+__pycach__/
