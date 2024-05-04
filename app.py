@@ -14,3 +14,9 @@ def idk():
     scraper = Scraper()
     scraper.log_in()
     return 'login'
+
+@app.route("/event/<event_name>")
+def get_event_info(event_name=None):
+    scraper = Scraper()
+    scraper.log_in()
+    return scraper.get_event_details(event_name)

@@ -13,6 +13,9 @@ from dotenv import load_dotenv
 class Scraper:
   print('Scraper class running')
   load_dotenv()
+  USERNAME = os.getenv("USERNAME")
+  PASSWORD = os.getenv("PASSWORD")
+  TARGET_SITE = os.getenv("TARGET_SITE")
 
   def __init__(self):
     self.driver = self.setup_driver()
@@ -27,21 +30,17 @@ class Scraper:
     return driver
 
   def log_in(self):
-    USERNAME = os.getenv("USERNAME")
-    PASSWORD = os.getenv("PASSWORD")
-    TARGET_SITE = os.getenv("TARGET_SITE")
-
     try:
-      self.driver.uc_open(f"https://{TARGET_SITE}/login")
+      self.driver.uc_open(f"https://{Scraper.TARGET_SITE}/login")
     except Exception as e:
       print("Could not find login page:", e)
 
     try:
       # TODO - eliminate sleep calls
       time.sleep(5)
-      self.driver.find_element(By.NAME, "username").send_keys(USERNAME)
+      self.driver.find_element(By.NAME, "username").send_keys(Scraper.USERNAME)
       time.sleep(2)
-      self.driver.find_element(By.NAME, "password").send_keys(PASSWORD)
+      self.driver.find_element(By.NAME, "password").send_keys(Scraper.PASSWORD)
       time.sleep(2.1654)
     except Exception as e:
       print("Could not send text to username and password fields: ", e)
@@ -65,6 +64,8 @@ class Scraper:
     if not self.logged_in:
         self.log_in()
 
+    self.driver.uc_open(f'http://{Scraper.TARGET_SITE}/{event_str}/register')
+
     ps_main_container = self.driver.find_element(By.ID, "psMainContainer")
 
     club_link = ps_main_container.find_element(By.TAG_NAME, 'a')
@@ -72,8 +73,11 @@ class Scraper:
     return Scraper.extract_nested_text(ps_main_container)
 
   def extract_nested_text(target_element):
+    print(target_element.text)
+    print("Target element :", target_element)
     # Find all descendant elements containing text
     text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
+
 
     # Extract the text values
     text_values = [element.strip() for element in text_elements if element.strip()]
