@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hello Bulma!</title>
+  <title>CompTracker</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
 </head>
 
@@ -12,12 +12,58 @@
   <section class="section">
     <div class="container">
       <h1 class="title">
-        Hello World
+        CompTracker
       </h1>
-      <p class="subtitle">
-        My first website with <strong>Bulma</strong>!
-      </p>
-    </div>
+      <h2>Input Forms</h2>
+      <form>
+        <label for="clubs">Club:</label>
+        <input type="text" id="club" name="club">
+        <button type="submit">Submit</button>
+      </form>
+      <br>
+      <form>
+        <label for="events">Event:</label>
+        <input type="text" id="event" name="event">
+        <button type="submit">Submit</button>
+      </form>
+
+      <h2>Hit API Endpoint</h2>
+      <button id="apiButton">Hit API</button>
+      
+      <script>
+        // Function to handle button click event
+        function hitAPI() {
+          // Make an API request using fetch or XMLHttpRequest
+          fetch('http://127.0.0.1:5000/login', {
+            method: 'POST', // or 'POST', 'PUT', etc.
+            headers: {
+              'Content-Type': 'application/json',
+              // Add any required headers here
+            },
+            // Add any additional options like body, etc.
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok');
+              }
+              // Process the response
+              return response.json();
+            })
+            .then(data => {
+              // Handle the data returned by the API
+              console.log(data);
+            })
+            .catch(error => {
+              // Handle errors
+              console.error('There was a problem with the API request:', error);
+            });
+        }
+
+        // Add event listener to the button
+        document.getElementById("apiButton").addEventListener("click", hitAPI);
+      </script>
+
+</div>
   </section>
 </body>
 

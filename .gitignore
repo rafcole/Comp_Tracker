@@ -3,5 +3,6 @@
 .env.*
 ./venv
 env/
-./downloaded_files
-__pycach__/
+./downloaded_files/
+./__pycach__/
+./scratch.md
