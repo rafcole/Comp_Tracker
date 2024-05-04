@@ -31,23 +31,35 @@ class Scraper:
     PASSWORD = os.getenv("PASSWORD")
     TARGET_SITE = os.getenv("TARGET_SITE")
 
-    self.driver.uc_open(f"https://{TARGET_SITE}/login")
+    try:
+      self.driver.uc_open(f"https://{TARGET_SITE}/login")
+    except Exception as e:
+      print("Could not find login page:", e)
 
-    # TODO - eliminate sleep calls
-    time.sleep(5)
+    try:
+      # TODO - eliminate sleep calls
+      time.sleep(5)
+      self.driver.find_element(By.NAME, "username").send_keys(USERNAME)
+      time.sleep(2)
+      self.driver.find_element(By.NAME, "password").send_keys(PASSWORD)
+      time.sleep(2.1654)
+    except Exception as e:
+      print("Could not send text to username and password fields: ", e)
 
-    self.driver.find_element(By.NAME, "username").send_keys(USERNAME)
-    time.sleep(2)
-    self.driver.find_element(By.NAME, "password").send_keys(PASSWORD)
-    time.sleep(2.1654)
-    # button = self.driver.find_element(By.CLASS_NAME, "btn.btn-md.btn-primary.btn-block.top3").click()
-    self.driver.uc_click('button.btn.btn-md.btn-primary.btn-block.top3[type="submit"]')
+    try:
+      # click login
+      self.driver.uc_click('button.btn.btn-md.btn-primary.btn-block.top3[type="submit"]')
 
-    # TODO - check for success
-    self.logged_in = True
+      # check for success
+      self.driver.assert_text("Welcome back!", "#psMainContainer > div.col-xs-12 > div")
+      self.driver.assert_element_present('/html/body/div[2]/div[3]/div/div[2]/ul[2]/li[1]/ul/li[8]/a')
+      self.logged_in = True
 
-    time.sleep(60)
-    pass
+      print("Login successful")
+    except Exception as e:
+      print(f"Log in failed : ", e)
+
+    return self.logged_in
 
   def get_event_details(self, event_str):
     if not self.logged_in:
