@@ -11,12 +11,14 @@ class Event:
   # finds the first link in the main container
   # as of 5/24 this is a link in the top right corner
   def club_name(self):
-    return self.parent_element.find_element(By.TAG_NAME, 'a')
+    top_right_link = self.parent_element.find_element(By.TAG_NAME, 'a').get_attribute('href')
+
+    return re.search()
 
 
   def event_status(self):
     # opens in n months/weeks/days
     # open
     # closed
-    top_right_status_text = self.parent_element.find_element(By.CLASS, 'label label-important')
+    top_right_status_text = self.parent_element.find_element(By.CLASS, 'label label-important').text
 
