@@ -1,5 +1,6 @@
 import time
 import os
+import re
 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -9,6 +10,8 @@ from seleniumbase import Driver
 import undetected_chromedriver as uc
 
 from dotenv import load_dotenv
+
+from event import Event
 
 class Scraper:
   print('Scraper class running')
@@ -71,7 +74,13 @@ class Scraper:
 
     ps_main_container = self.driver.find_element(By.ID, "psMainContainer")
 
-    club_link = ps_main_container.find_element(By.TAG_NAME, 'a')
+    event = Event(ps_main_container)
+
+
+
+    club_link = ps_main_container.find_element(By.TAG_NAME, 'a').get_attribute('href')
+    print("Club_link in Scraper: ", club_link)
+
 
     return Scraper.extract_nested_text(ps_main_container)
 
@@ -88,32 +97,63 @@ class Scraper:
     # return text_values
     return target_element.text
 
+  def get_events_from_club(self, club_name):
+    def find_match_table():
+      try:
+        return self.driver.find_element(By.CLASS_NAME, "table.table-striped")
+
+      except NoSuchElementException:
+        print("Could Not Find Results Table")
+
+    def get_table_rows(table):
+      try:
+        return table.find_elements(By.TAG_NAME, "tr")
+      except NoSuchElementException:
+        print("Empty Table")
+
+    def extract_event_URL_from_row(row):
+      try:
+          link = row.find_element(By.TAG_NAME, 'a')
+
+          return link.get_attribute('href')
+      except NoSuchElementException:
+          print("No Link found in this row")
+
+    def extract_event_name(event_url):
+      return re.search(r'(?<=\.com\/)(.*?)(?=\/register)', url).group(0)
+
+
+    self.driver.uc_open(f"https://{Scraper.TARGET_SITE}/clubs/{club_name}/matches?filter=upcoming")
+
+    match_table = find_match_table()
+    rows = get_table_rows(match_table)
+    match_urls = []
+    event_names = []
+
+    for row in rows:
+      url = extract_event_URL_from_row(row)
+      last_event = url
+      event_name = extract_event_name(url)
+
+      event_names.append(event_name)
+      match_urls.append(url)
+
+    print(event_names)
+
+    return event_names
 
 
 
-def find_match_table(driver):
-  try:
-    return driver.find_element(By.CLASS_NAME, "table.table-striped")
 
-  except NoSuchElementException:
-    print("Could Not Find Results Table")
 
-def get_table_rows(table):
-  try:
-     return table.find_elements(By.TAG_NAME, "tr")
-  except NoSuchElementException:
-     print("Empty Table")
 
-def extract_event_URL_from_row(row):
-   try:
-      link = row.find_element(By.TAG_NAME, 'a')
 
-      return link.get_attribute('href')
-   except NoSuchElementException:
-      print("No Link found in this row")
 
-def extract_event_name(event_url):
-   return re.search(r'(?<=\.com\/)(.*?)(?=\/register)', url).group(0)
+
+
+
+
+
 
 def get_events_from_club(club_name_str, driver):
 
