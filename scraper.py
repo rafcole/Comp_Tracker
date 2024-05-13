@@ -37,11 +37,11 @@ class Scraper:
 
     try:
       # TODO - eliminate sleep calls
-      time.sleep(5)
-      self.driver.find_element(By.NAME, "username").send_keys(Scraper.USERNAME)
       time.sleep(2)
+      self.driver.find_element(By.NAME, "username").send_keys(Scraper.USERNAME)
+      time.sleep(1)
       self.driver.find_element(By.NAME, "password").send_keys(Scraper.PASSWORD)
-      time.sleep(2.1654)
+      time.sleep(1)
     except Exception as e:
       print("Could not send text to username and password fields: ", e)
 
@@ -76,13 +76,14 @@ class Scraper:
     print(target_element.text)
     print("Target element :", target_element)
     # Find all descendant elements containing text
-    text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
+    # text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
 
 
     # Extract the text values
-    text_values = [element.strip() for element in text_elements if element.strip()]
+    # text_values = [element.strip() for element in text_elements if element.strip()]
 
-    return text_values
+    # return text_values
+    return target_element.text
 
 
 
