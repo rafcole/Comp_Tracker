@@ -1,5 +1,6 @@
 import time
 import os
+import re
 
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
@@ -9,6 +10,8 @@ from seleniumbase import Driver
 import undetected_chromedriver as uc
 
 from dotenv import load_dotenv
+
+from event import Event
 
 class Scraper:
   print('Scraper class running')
@@ -21,6 +24,9 @@ class Scraper:
     self.driver = self.setup_driver()
 
     self.logged_in = False
+
+  def quit(self):
+    self.driver.quit()
 
   # feels hardcoded but we don't have any other use cases to accomodate right now
   def setup_driver(self):
@@ -37,11 +43,11 @@ class Scraper:
 
     try:
       # TODO - eliminate sleep calls
-      time.sleep(5)
-      self.driver.find_element(By.NAME, "username").send_keys(Scraper.USERNAME)
       time.sleep(2)
+      self.driver.find_element(By.NAME, "username").send_keys(Scraper.USERNAME)
+      time.sleep(1)
       self.driver.find_element(By.NAME, "password").send_keys(Scraper.PASSWORD)
-      time.sleep(2.1654)
+      time.sleep(1)
     except Exception as e:
       print("Could not send text to username and password fields: ", e)
 
@@ -68,7 +74,13 @@ class Scraper:
 
     ps_main_container = self.driver.find_element(By.ID, "psMainContainer")
 
-    club_link = ps_main_container.find_element(By.TAG_NAME, 'a')
+    event = Event(ps_main_container)
+
+
+
+    club_link = ps_main_container.find_element(By.TAG_NAME, 'a').get_attribute('href')
+    print("Club_link in Scraper: ", club_link)
+
 
     return Scraper.extract_nested_text(ps_main_container)
 
@@ -76,40 +88,72 @@ class Scraper:
     print(target_element.text)
     print("Target element :", target_element)
     # Find all descendant elements containing text
-    text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
+    # text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
 
 
     # Extract the text values
-    text_values = [element.strip() for element in text_elements if element.strip()]
+    # text_values = [element.strip() for element in text_elements if element.strip()]
 
-    return text_values
+    # return text_values
+    return target_element.text
+
+  def get_events_from_club(self, club_name):
+    def find_match_table():
+      try:
+        return self.driver.find_element(By.CLASS_NAME, "table.table-striped")
+
+      except NoSuchElementException:
+        print("Could Not Find Results Table")
+
+    def get_table_rows(table):
+      try:
+        return table.find_elements(By.TAG_NAME, "tr")
+      except NoSuchElementException:
+        print("Empty Table")
+
+    def extract_event_URL_from_row(row):
+      try:
+          link = row.find_element(By.TAG_NAME, 'a')
+
+          return link.get_attribute('href')
+      except NoSuchElementException:
+          print("No Link found in this row")
+
+    def extract_event_name(event_url):
+      return re.search(r'(?<=\.com\/)(.*?)(?=\/register)', url).group(0)
+
+
+    self.driver.uc_open(f"https://{Scraper.TARGET_SITE}/clubs/{club_name}/matches?filter=upcoming")
+
+    match_table = find_match_table()
+    rows = get_table_rows(match_table)
+    match_urls = []
+    event_names = []
+
+    for row in rows:
+      url = extract_event_URL_from_row(row)
+      last_event = url
+      event_name = extract_event_name(url)
+
+      event_names.append(event_name)
+      match_urls.append(url)
+
+    print(event_names)
+
+    return event_names
 
 
 
 
-def find_match_table(driver):
-  try:
-    return driver.find_element(By.CLASS_NAME, "table.table-striped")
 
-  except NoSuchElementException:
-    print("Could Not Find Results Table")
 
-def get_table_rows(table):
-  try:
-     return table.find_elements(By.TAG_NAME, "tr")
-  except NoSuchElementException:
-     print("Empty Table")
 
-def extract_event_URL_from_row(row):
-   try:
-      link = row.find_element(By.TAG_NAME, 'a')
 
-      return link.get_attribute('href')
-   except NoSuchElementException:
-      print("No Link found in this row")
 
-def extract_event_name(event_url):
-   return re.search(r'(?<=\.com\/)(.*?)(?=\/register)', url).group(0)
+
+
+
+
 
 def get_events_from_club(club_name_str, driver):
 
