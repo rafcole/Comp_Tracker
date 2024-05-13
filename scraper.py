@@ -22,6 +22,9 @@ class Scraper:
 
     self.logged_in = False
 
+  def close(self):
+    self.driver.quit()
+
   # feels hardcoded but we don't have any other use cases to accomodate right now
   def setup_driver(self):
     driver = Driver(uc=True)
