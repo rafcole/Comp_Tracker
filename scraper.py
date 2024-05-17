@@ -76,25 +76,20 @@ class Scraper:
 
     event = Event(ps_main_container)
 
-
-
+    print("Club Name: ", event.club_name())
     club_link = ps_main_container.find_element(By.TAG_NAME, 'a').get_attribute('href')
     print("Club_link in Scraper: ", club_link)
+    print("Event status: ", event.status())
+
+    print("Event JSON: ", event.json())
 
 
-    return Scraper.extract_nested_text(ps_main_container)
+    return "Club Name: " + event.club_name()# Scraper.extract_nested_text(ps_main_container)
 
   def extract_nested_text(target_element):
     print(target_element.text)
     print("Target element :", target_element)
-    # Find all descendant elements containing text
-    # text_elements = target_element.find_elements(By.XPATH, ".//*/text()")
 
-
-    # Extract the text values
-    # text_values = [element.strip() for element in text_elements if element.strip()]
-
-    # return text_values
     return target_element.text
 
   def get_events_from_club(self, club_name):
@@ -141,17 +136,6 @@ class Scraper:
     print(event_names)
 
     return event_names
-
-
-
-
-
-
-
-
-
-
-
 
 
 
